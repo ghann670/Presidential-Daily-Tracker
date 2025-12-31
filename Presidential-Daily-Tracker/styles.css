@@ -1,0 +1,498 @@
+/* ===========================
+   Presidential Daily Tracker
+   Modern Design System
+   =========================== */
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Colors */
+    --primary-blue: hsl(220, 90%, 55%);
+    --primary-blue-dark: hsl(220, 90%, 45%);
+    --primary-purple: hsl(280, 90%, 65%);
+    --bg-dark: hsl(220, 20%, 10%);
+    --bg-card: hsl(220, 20%, 15%);
+    --bg-card-hover: hsl(220, 20%, 18%);
+    --text-primary: hsl(0, 0%, 95%);
+    --text-secondary: hsl(0, 0%, 70%);
+    --border-color: hsl(220, 20%, 25%);
+
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* Header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(22, 27, 34, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+
+.header-content {
+    max-width: 100%;
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.date-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: var(--bg-card);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-color);
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: var(--bg-card-hover);
+    transform: scale(1.1);
+}
+
+.current-date {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 200px;
+    text-align: center;
+}
+
+/* Main Layout */
+.main-content {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: 1fr auto;
+    gap: 0;
+}
+
+/* Sidebar - Calendar */
+.sidebar {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    background: rgba(22, 27, 34, 0.95);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid var(--border-color);
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+}
+
+.calendar-container {
+    width: 100%;
+}
+
+.calendar-header {
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+}
+
+.calendar-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.weekday {
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: var(--spacing-xs);
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--spacing-xs);
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    position: relative;
+    cursor: default;
+    transition: all 0.3s ease;
+}
+
+.calendar-day.empty {
+    opacity: 0;
+}
+
+.calendar-day.has-events {
+    cursor: pointer;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+}
+
+.calendar-day.has-events:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.calendar-day.selected {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+.day-number {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.event-dot {
+    position: absolute;
+    bottom: 4px;
+    width: 4px;
+    height: 4px;
+    background: var(--primary-blue);
+    border-radius: 50%;
+}
+
+.calendar-day.selected .event-dot {
+    background: white;
+}
+
+/* Map Container */
+.map-container {
+    grid-column: 2;
+    grid-row: 1;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Timeline */
+.timeline-wrapper {
+    grid-column: 2;
+    grid-row: 2;
+    background: rgba(22, 27, 34, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-md);
+    max-height: 200px;
+}
+
+.timeline-container {
+    display: flex;
+    gap: var(--spacing-sm);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: var(--spacing-sm);
+}
+
+.timeline-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.timeline-container::-webkit-scrollbar-track {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: var(--radius-sm);
+}
+
+.timeline-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+.timeline-event {
+    flex-shrink: 0;
+    min-width: 280px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.timeline-event:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-blue);
+}
+
+.timeline-event.selected {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 24px rgba(59, 130, 246, 0.6);
+}
+
+.event-time {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: var(--spacing-xs);
+}
+
+.timeline-event.selected .event-time {
+    color: white;
+}
+
+.event-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.4;
+}
+
+.event-location {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.timeline-event.selected .event-location {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.no-events {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: var(--spacing-lg);
+    font-size: 1rem;
+}
+
+/* Marker Pulse Animation */
+@keyframes marker-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: 200px 1fr auto;
+    }
+
+    .sidebar {
+        grid-column: 1;
+        grid-row: 1;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        overflow-y: auto;
+    }
+
+    .map-container {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .timeline-wrapper {
+        grid-column: 1;
+        grid-row: 3;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+}
+
+@media (max-width: 640px) {
+    .header-content {
+        padding: var(--spacing-sm);
+    }
+
+    .title {
+        font-size: 1.25rem;
+    }
+
+    .current-date {
+        font-size: 0.9rem;
+        min-width: 150px;
+    }
+
+    .timeline-event {
+        min-width: 240px;
+    }
+
+    .main-content {
+        top: 120px;
+    }
+}
+
+/* Mapbox Popup Customization */
+.mapboxgl-popup-content {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--spacing-md);
+}
+
+.mapboxgl-popup-tip {
+    border-top-color: var(--bg-card);
+}
+
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+    border-top-color: var(--bg-card);
+}
+
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
+    border-bottom-color: var(--bg-card);
+}
+
+.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+    border-right-color: var(--bg-card);
+}
+
+.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+    border-left-color: var(--bg-card);
+}
+
+/* ===========================
+   Interactive Map Elements
+   =========================== */
+.destination-label {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-card);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-xl);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    z-index: 1000;
+    pointer-events: none;
+    border: 2px solid var(--primary-blue);
+    animation: labelEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes labelEntrance {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20%) scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.label-text {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.location-icon {
+    font-size: 1.5rem;
+}
+
+.marker-target {
+    z-index: 1000 !important;
+}
+
+/* Mapbox Marker Styles */
+.custom-marker .marker-pin.marker-target {
+    background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-blue) 100%) !important;
+    transform: scale(1.2) !important;
+    box-shadow: 0 0 20px hsla(280, 90%, 65%, 0.5) !important;
+}
+
+.custom-marker .marker-pin.marker-arrived {
+    animation: marker-pulse 2s infinite !important;
+}
+
+.hidden {
+    display: none !important;
+}

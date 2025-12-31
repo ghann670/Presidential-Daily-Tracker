@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대통령의 하루 - Presidential Daily Tracker</title>
+
+    <!-- Mapbox GL JS CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="title">대통령의 하루</h1>
+            <div class="date-nav">
+                <button id="prev-date" class="nav-btn" aria-label="이전 날짜">◀</button>
+                <div id="current-date" class="current-date">날짜를 선택하세요</div>
+                <button id="next-date" class="nav-btn" aria-label="다음 날짜">▶</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Calendar Sidebar -->
+        <aside class="sidebar">
+            <div id="calendar-container" class="calendar-container"></div>
+        </aside>
+
+        <!-- Map Container -->
+        <div id="map" class="map-container">
+            <!-- Floating Location Label -->
+            <div id="destination-label" class="destination-label hidden">
+                <span class="location-icon">📍</span>
+                <span id="label-text" class="label-text"></span>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-wrapper">
+            <div id="timeline-container" class="timeline-container"></div>
+        </div>
+    </main>
+
+    <!-- Mapbox GL JS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+
+    <!-- Application Scripts -->
+    <script src="schedule-data.js"></script>
+    <script src="character.js"></script>
+    <script src="calendar.js"></script>
+    <script src="map-controller.js"></script>
+    <script src="timeline.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
