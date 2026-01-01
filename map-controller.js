@@ -4,6 +4,9 @@
 // Set Mapbox access token
 mapboxgl.accessToken = 'pk.eyJ1IjoiZ3l1MSIsImEiOiJjbWpzaTVmbHA0cGpnM2hwc3d4djdlNHoxIn0.qdEvNcXk4APFiK4I0mhnow';
 
+// Initialize Mapbox Geocoding client
+const mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
+
 class MapController {
     constructor() {
         this.map = null;
@@ -13,14 +16,24 @@ class MapController {
     }
 
     initialize(containerId) {
-        // Initialize Mapbox map centered on Seoul
+        // Initialize Mapbox map centered on Seoul with isometric 3D view
         this.map = new mapboxgl.Map({
             container: containerId,
-            style: 'mapbox://styles/mapbox/dark-v11', // Dark theme
+            style: 'mapbox://styles/gyu1/cmjute7gq002101skb5t272bg', // Custom 3D style
             center: [126.9748, 37.5867], // [lng, lat] - Note: Mapbox uses lng, lat order
             zoom: 11,
-            pitch: 0,
-            bearing: 0
+            pitch: 60, // Isometric view angle (0-85, 60 is good for isometric)
+            bearing: 0, // Rotation angle (0-360)
+            antialias: true // Smooth 3D rendering
+        });
+
+        // Configure map lighting and labels
+        this.map.on('style.load', () => {
+            this.map.setConfigProperty('basemap', 'lightPreset', 'day');
+            this.map.setConfigProperty('basemap', 'showPlaceLabels', true);
+            this.map.setConfigProperty('basemap', 'showPointOfInterestLabels', true);
+            this.map.setConfigProperty('basemap', 'showRoadLabels', true);
+            this.map.setConfigProperty('basemap', 'showTransitLabels', true);
         });
 
         // Add navigation controls
@@ -85,28 +98,6 @@ class MapController {
     }
 
     addMarker(event, highlight = false) {
-        // Create custom marker element
-        const markerEl = document.createElement('div');
-        markerEl.className = 'custom-marker';
-        markerEl.innerHTML = `
-            <div class="marker-pin" style="
-                width: 40px;
-                height: 40px;
-                background: hsl(220, 80%, 60%);
-                border: 3px solid white;
-                border-radius: 50%;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 20px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            ">
-                📍
-            </div>
-        `;
-
         // Create popup
         const popup = new mapboxgl.Popup({
             offset: 25,
@@ -120,18 +111,28 @@ class MapController {
             </div>
         `);
 
-        // Create marker (Mapbox uses [lng, lat] order)
+        // Create Mapbox default marker (simple pin)
         const marker = new mapboxgl.Marker({
-            element: markerEl,
-            anchor: 'bottom'
+            color: highlight ? '#4CAF50' : '#3B82F6'
         })
             .setLngLat([event.coordinates.lng, event.coordinates.lat])
             .setPopup(popup)
             .addTo(this.map);
 
-        if (highlight) {
-            markerEl.querySelector('.marker-pin')?.classList.add('marker-arrived');
-        }
+        // Store marker state for color changes
+        marker._state = highlight ? 'arrived' : 'default';
+        marker._updateColor = function(state) {
+            this._state = state;
+            const colors = {
+                'default': '#3B82F6',
+                'target': '#FF9800',
+                'arrived': '#4CAF50'
+            };
+            this.getElement().style.setProperty('--marker-color', colors[state] || colors.default);
+            this.getElement().querySelectorAll('svg path').forEach(path => {
+                path.setAttribute('fill', colors[state] || colors.default);
+            });
+        };
 
         this.markers[event.id] = marker;
         return marker;
@@ -229,5 +230,69 @@ class MapController {
 
     getMap() {
         return this.map;
+    }
+
+    // Set pitch (tilt angle) - 0 to 85 degrees
+    setPitch(pitch) {
+        this.map.setPitch(pitch);
+    }
+
+    // Set bearing (rotation angle) - 0 to 360 degrees
+    setBearing(bearing) {
+        this.map.setBearing(bearing);
+    }
+
+    // Animate to specific pitch and bearing
+    easeToPitchBearing(pitch, bearing, duration = 1000) {
+        this.map.easeTo({
+            pitch: pitch,
+            bearing: bearing,
+            duration: duration
+        });
+    }
+
+    // Reset to default isometric view
+    resetView() {
+        this.map.easeTo({
+            pitch: 60,
+            bearing: 0,
+            duration: 1000
+        });
+    }
+
+    // Geocode an address to coordinates
+    async geocodeAddress(address) {
+        try {
+            const response = await mapboxClient.geocoding
+                .forwardGeocode({
+                    query: address,
+                    countries: ['KR'], // Limit to South Korea
+                    autocomplete: false,
+                    limit: 1
+                })
+                .send();
+
+            if (
+                !response ||
+                !response.body ||
+                !response.body.features ||
+                !response.body.features.length
+            ) {
+                console.error('Invalid geocoding response for:', address);
+                return null;
+            }
+
+            const feature = response.body.features[0];
+            const [lng, lat] = feature.center;
+
+            return {
+                lat: lat,
+                lng: lng,
+                fullAddress: feature.place_name
+            };
+        } catch (error) {
+            console.error('Geocoding error:', error);
+            return null;
+        }
     }
 }

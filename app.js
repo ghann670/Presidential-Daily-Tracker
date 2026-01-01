@@ -131,7 +131,7 @@ class PresidentialDailyTracker {
             this.characterController.show(offsetLatLng, this.mapController.getMap());
 
             // Highlight first marker
-            this.mapController.markers[firstEvent.id]?.getElement()?.querySelector('.marker-pin')?.classList.add('marker-arrived');
+            this.mapController.markers[firstEvent.id]?._updateColor?.('arrived');
         }
     }
 
@@ -147,10 +147,7 @@ class PresidentialDailyTracker {
         destLabel.classList.add('hidden');
         this.characterController.hide();
         Object.values(this.mapController.markers).forEach(m => {
-            const markerPin = m.getElement()?.querySelector('.marker-pin');
-            if (markerPin) {
-                markerPin.classList.remove('marker-target', 'marker-arrived');
-            }
+            m._updateColor?.('default');
         });
 
         // ===========================
@@ -162,7 +159,7 @@ class PresidentialDailyTracker {
 
         // First event special case
         if (this.currentEventIndex === -1 || index === 0) {
-            this.mapController.markers[event.id]?.getElement()?.querySelector('.marker-pin')?.classList.add('marker-arrived');
+            this.mapController.markers[event.id]?._updateColor?.('arrived');
             const offsetLatLng = { lat: targetLatLng.lat + 0.0002, lng: targetLatLng.lng + 0.0002 };
             this.characterController.show(offsetLatLng, this.mapController.getMap());
             this.currentEventIndex = index;
@@ -185,7 +182,7 @@ class PresidentialDailyTracker {
 
         labelText.textContent = event.location;
         destLabel.classList.remove('hidden');
-        this.mapController.markers[event.id]?.getElement()?.querySelector('.marker-pin')?.classList.add('marker-target');
+        this.mapController.markers[event.id]?._updateColor?.('target');
         await new Promise(r => setTimeout(r, 800));
 
         // ===========================
@@ -208,11 +205,7 @@ class PresidentialDailyTracker {
         // State 5 - Arrival
         // ===========================
         destLabel.classList.add('hidden');
-        const markerPin = this.mapController.markers[event.id]?.getElement()?.querySelector('.marker-pin');
-        if (markerPin) {
-            markerPin.classList.remove('marker-target');
-            markerPin.classList.add('marker-arrived');
-        }
+        this.mapController.markers[event.id]?._updateColor?.('arrived');
 
         // Show popup summary
         this.mapController.markers[event.id]?.togglePopup();
